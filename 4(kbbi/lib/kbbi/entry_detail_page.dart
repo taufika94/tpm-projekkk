@@ -19,6 +19,14 @@ class _EntryDetailPageState extends State<EntryDetailPage> {
   late DatabaseService _databaseService;
   String _username = '';
 
+  // Define your custom colors here
+  static const Color primaryDarkBlue = Color(0xFF1F3240);
+  static const Color accentTeal = Color(0xFF3B7B8C);
+  static const Color backgroundLightCream = Color(0xFFF2EDDC);
+  static const Color accentOrange = Color(0xFFFF8C00);
+  static const Color textBrown = Color(0xFF7F3E2C);
+
+
   @override
   void initState() {
     super.initState();
@@ -53,43 +61,42 @@ class _EntryDetailPageState extends State<EntryDetailPage> {
   }
 
   Future<void> _toggleFavorite() async {
-  if (_username.isEmpty) {
-    _showSnackBar('Anda harus login untuk menambahkan favorit.');
-    return;
-  }
-
-  setState(() {
-    _isFavorite = !_isFavorite;
-  });
-
-  try {
-    if (_isFavorite) {
-      await _databaseService.addFavorite(widget.entry, _username);
-      String message = '${widget.entry.word} berhasil disimpan!';
-      _showSnackBar(message);
-      await _saveNotification(message); // Simpan notifikasi
-    } else {
-      await _databaseService.removeFavorite(widget.entry.word, _username);
-      String message = '${widget.entry.word} berhasil dihapus dari daftar simpan.';
-      _showSnackBar(message);
-      await _saveNotification(message); // Simpan notifikasi
+    if (_username.isEmpty) {
+      _showSnackBar('Anda harus login untuk menambahkan favorit.');
+      return;
     }
-  } catch (e) {
-    print('Error toggling favorite: $e');
-    _showSnackBar('Gagal menyimpan: ${e.toString()}');
+
     setState(() {
-      _isFavorite = !_isFavorite; // Kembalikan status ke sebelumnya jika gagal
+      _isFavorite = !_isFavorite;
     });
+
+    try {
+      if (_isFavorite) {
+        await _databaseService.addFavorite(widget.entry, _username);
+        String message = '${widget.entry.word} berhasil disimpan!';
+        _showSnackBar(message);
+        await _saveNotification(message); // Simpan notifikasi
+      } else {
+        await _databaseService.removeFavorite(widget.entry.word, _username);
+        String message = '${widget.entry.word} berhasil dihapus dari daftar simpan.';
+        _showSnackBar(message);
+        await _saveNotification(message); // Simpan notifikasi
+      }
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      _showSnackBar('Gagal menyimpan: ${e.toString()}');
+      setState(() {
+        _isFavorite = !_isFavorite; // Kembalikan status ke sebelumnya jika gagal
+      });
+    }
   }
-}
 
-Future<void> _saveNotification(String message) async {
-  final prefs = await SharedPreferences.getInstance();
-  List<String> notifications = prefs.getStringList('notifications') ?? [];
-  notifications.add(message);
-  await prefs.setStringList('notifications', notifications);
-}
-
+  Future<void> _saveNotification(String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> notifications = prefs.getStringList('notifications') ?? [];
+    notifications.add(message);
+    await prefs.setStringList('notifications', notifications);
+  }
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -103,23 +110,40 @@ Future<void> _saveNotification(String message) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Set the background color of the scaffold
+      backgroundColor: backgroundLightCream,
       appBar: AppBar(
-        title: Text(widget.entry.word),
-        leading: IconButton( // <--- Tambahkan IconButton ini untuk tombol back
+        title: Text(
+          widget.entry.word,
+          style: const TextStyle(color: backgroundLightCream), // Title text color
+        ),
+        backgroundColor: primaryDarkBlue, // AppBar background color
+        iconTheme: const IconThemeData(color: backgroundLightCream), // Back icon color
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Pop semua rute hingga mencapai rute dengan nama '/entry_list'
-            // Ini akan memastikan kembali ke EntryListPage, tidak peduli dari mana EntryDetailPage dipanggil.
+            // Pop all routes until reaching the route with name '/kbbi_list'
+            // This ensures returning to EntryListPage, regardless of where EntryDetailPage was called from.
             Navigator.pop(context, ModalRoute.withName('/kbbi_list'));
           },
         ),
         actions: [
           IconButton(
             icon: Icon(
-              _isFavorite ? Icons.save : Icons.save,
-              color: _isFavorite ? Colors.red : null,
+              _isFavorite ? Icons.bookmark : Icons.bookmark_border, // Changed icon to bookmark for save/unsave semantic
+              color: _isFavorite ? accentOrange : backgroundLightCream, // Orange when favorited, light cream when not
             ),
             onPressed: _toggleFavorite,
+          ),
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationPage()),
+              );
+            },
+            color: backgroundLightCream, // Notification icon color
           ),
         ],
       ),
@@ -135,7 +159,7 @@ Future<void> _saveNotification(String message) async {
                   'Jenis: ${widget.entry.type!}',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[600],
+                    color: textBrown, // Changed text color
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -145,15 +169,20 @@ Future<void> _saveNotification(String message) async {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   'Lema: ${widget.entry.lema!}',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: primaryDarkBlue, // Changed text color
+                    fontWeight: FontWeight.bold, // Make Lema stand out a bit
+                  ),
                 ),
               ),
-            const Divider(),
+            const Divider(color: accentTeal, thickness: 1.5), // Divider color and thickness
             const Text(
               'Arti:',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: primaryDarkBlue, // Changed text color
               ),
             ),
             const SizedBox(height: 8),
@@ -165,7 +194,10 @@ Future<void> _saveNotification(String message) async {
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Text(
                             '- ${meaning.deskripsi}',
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: textBrown, // Changed text color
+                            ),
                           ),
                         ))
                     .toList(),
@@ -175,12 +207,13 @@ Future<void> _saveNotification(String message) async {
                 padding: const EdgeInsets.only(top: 16.0),
                 child: InkWell(
                   onTap: () {
-                    // Open thesaurus link in browser
+                    // Open thesaurus link in browser - (You'll need to implement this with url_launcher package)
+                    // Example: _launchUrl(widget.entry.tesaurusLink!);
                   },
                   child: Text(
                     'Lihat tesaurus: ${widget.entry.tesaurusLink!}',
                     style: const TextStyle(
-                      color: Colors.blue,
+                      color: accentTeal, // Changed link color
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -191,4 +224,11 @@ Future<void> _saveNotification(String message) async {
       ),
     );
   }
+
+  // Example for _launchUrl function (requires url_launcher package)
+  // Future<void> _launchUrl(String url) async {
+  //   if (!await launchUrl(Uri.parse(url))) {
+  //     _showSnackBar('Could not launch $url');
+  //   }
+  // }
 }

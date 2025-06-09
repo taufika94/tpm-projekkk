@@ -51,7 +51,7 @@ dependencies:
   geocoding: ^3.0.0
   flutter_map: ^7.0.0
   sensors_plus: ^5.0.1 # Tambahkan ini
-  flutter_compass: ^0.7.0 # Tambahkan ini
+  flutter_compass: ^0.8.0 # Tambahkan ini
 
 
 dev_dependencies:

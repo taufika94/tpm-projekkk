@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,7 +10,6 @@ import 'dart:convert';
 import 'dart:async'; // Import for StreamSubscription
 
 import 'package:sensors_plus/sensors_plus.dart'; // Import sensors_plus
-import 'package:flutter_compass/flutter_compass.dart'; // Import flutter_compass
 
 import 'quiz_manager.dart'; // Pastikan quiz_manager.dart ada di lokasi yang sama
 
@@ -492,13 +492,28 @@ class _LocationTrackerPageState extends State<LocationTrackerPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pelacak Lokasi & Jarak'),
-        backgroundColor: Colors.teal,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.tealAccent], // Subtle gradient
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
         centerTitle: true,
+        elevation: 8, // Add a subtle shadow
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20), // Rounded bottom corners for app bar
+          ),
+        ),
       ),
       body: Column(
         children: [
           Expanded(
+            flex: 2, // Memberikan 2/3 ruang untuk peta
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
@@ -522,7 +537,8 @@ class _LocationTrackerPageState extends State<LocationTrackerPage> {
                       'OpenStreetMap contributors',
                       onTap: () =>
                           launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
-                    )],
+                    )
+                  ],
                 ),
                 MarkerLayer(
                   markers: [
@@ -574,289 +590,319 @@ class _LocationTrackerPageState extends State<LocationTrackerPage> {
               ],
             ),
           ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Current Location & Sensor Data Card
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Lokasi Anda Saat Ini:',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
-                        ),
-                        const SizedBox(height: 8),
-                        _currentPosition == null
-                            ? const Center(child: CircularProgressIndicator())
-                            : Text(
-                                _currentLocationMessage,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                        const SizedBox(height: 15),
-                        Center(
-                          child: ElevatedButton.icon(
-                            onPressed: _getCurrentLocation,
-                            icon: const Icon(Icons.my_location),
-                            label: const Text('Perbarui Lokasi Saya'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 30),
-                        const Text(
-                          'Data Sensor:',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _sensorMessage,
-                          style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Quiz Feature Card
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Fitur Kuis Lokasi:',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepOrange),
-                        ),
-                        const SizedBox(height: 15),
-                        if (!_quizMode)
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: _startQuiz,
-                              icon: const Icon(Icons.quiz),
-                              label: const Text('Mulai Kuis Jarak'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepOrange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                          )
-                        else
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                _quizQuestion,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 15),
-                              TextField(
-                                controller: _quizManager.quizAnswerController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: 'Masukkan perkiraan jarak (km)',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  prefixIcon: const Icon(Icons.numbers),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: _submitQuizAnswer,
-                                      icon: const Icon(Icons.check),
-                                      label: const Text('Jawab'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: _cancelQuiz,
-                                      icon: const Icon(Icons.cancel),
-                                      label: const Text('Batal Kuis'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.grey,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              Text(
-                                _quizResult,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blueGrey),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Calculate Distance Card (only visible when not in quiz mode)
-                if (!_quizMode)
+          // Bagian di bawah ini akan di-scroll
+          Expanded(
+            flex: 3, // Memberikan 3/5 ruang untuk konten yang bisa di-scroll
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Current Location & Sensor Data Card
                   Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 6, // Slightly more elevation
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), // More rounded
+                    margin: const EdgeInsets.only(bottom: 20),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0), // More padding
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Hitung Jarak ke Lokasi Lain:',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-                          ),
-                          const SizedBox(height: 15),
-                          TextField(
-                            controller: _destinationController,
-                            decoration: InputDecoration(
-                              labelText: _pickingDestinationFromMap
-                                  ? 'Ketuk di peta untuk memilih tujuan...'
-                                  : 'Masukkan Alamat Tujuan (contoh: Monas, Jakarta)',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              prefixIcon: const Icon(Icons.location_on),
-                              suffixIcon: _pickingDestinationFromMap
-                                  ? const Icon(Icons.touch_app)
-                                  : IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () {
-                                        _destinationController.clear();
-                                        setState(() {
-                                          _destinationLatLng = null;
-                                          _distanceMessage = '';
-                                          _routePolyline.clear();
-                                        });
-                                      },
-                                    ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                            ),
-                            readOnly: _pickingDestinationFromMap,
-                            onTap: () {
-                              if (_pickingDestinationFromMap) {
-                                _showSnackBar('Mode pemilihan peta aktif. Ketuk peta untuk memilih lokasi.');
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 15),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    setState(() {
-                                      _pickingDestinationFromMap = !_pickingDestinationFromMap;
-                                      _destinationLatLng = null;
-                                      _destinationController.clear();
-                                      _routePolyline.clear();
-                                      _distanceMessage = '';
-                                    });
-                                    _showSnackBar(_pickingDestinationFromMap
-                                        ? 'Mode pemilihan peta diaktifkan. Ketuk di peta untuk memilih lokasi.'
-                                        : 'Mode pemilihan peta dinonaktifkan.');
-                                  },
-                                  icon: const Icon(Icons.map),
-                                  label: Text(_pickingDestinationFromMap
-                                      ? 'Batalkan Pilih dari Peta'
-                                      : 'Pilih dari Peta'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: _pickingDestinationFromMap
-                                        ? Colors.orange
-                                        : Colors.purple,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: _calculateStraightLineDistance,
-                                  icon: const Icon(Icons.straighten),
-                                  label: const Text('Garis Lurus'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blueGrey,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-                          ElevatedButton.icon(
-                            onPressed: _isLoadingRoute ? null : _calculateActualRoute,
-                            icon: _isLoadingRoute
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
-                                : const Icon(Icons.alt_route),
-                            label: const Text('Rute Sebenarnya'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightGreen,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            'Lokasi Anda Saat Ini:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
                             ),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 10),
+                          _currentPosition == null
+                              ? const Center(child: CircularProgressIndicator())
+                              : Text(
+                                  _currentLocationMessage,
+                                  style: const TextStyle(fontSize: 17, color: Colors.black87),
+                                ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: _getCurrentLocation,
+                              icon: const Icon(Icons.my_location),
+                              label: const Text('Perbarui Lokasi Saya'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent.shade700, // Darker shade of blue
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 14), // Larger padding
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // More rounded
+                                elevation: 5, // Button elevation
+                              ),
+                            ),
+                          ),
+                          const Divider(height: 40, thickness: 1.5, color: Colors.grey), // Thicker divider
+                          const Text(
+                            'Data Sensor:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
                           Text(
-                            _distanceMessage,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
-                            textAlign: TextAlign.center,
+                            _sensorMessage,
+                            style: const TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: Colors.grey),
                           ),
                         ],
                       ),
                     ),
                   ),
-              ],
+
+                  // Quiz Feature Card
+                  Card(
+                    elevation: 6, // Slightly more elevation
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), // More rounded
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0), // More padding
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Fitur Kuis Lokasi:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepOrange,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          if (!_quizMode)
+                            Center(
+                              child: ElevatedButton.icon(
+                                onPressed: _startQuiz,
+                                icon: const Icon(Icons.quiz),
+                                label: const Text('Mulai Kuis Jarak'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepOrange.shade700, // Darker orange
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 14), // Larger padding
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // More rounded
+                                  elevation: 5,
+                                ),
+                              ),
+                            )
+                          else
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  _quizQuestion,
+                                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Colors.black87),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                TextField(
+                                  controller: _quizManager.quizAnswerController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Masukkan perkiraan jarak (km)',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.deepOrange.shade300), // Border color hint
+                                    ),
+                                    enabledBorder: OutlineInputBorder( // Custom enabled border
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.deepOrange.shade300, width: 1.0),
+                                    ),
+                                    focusedBorder: OutlineInputBorder( // Custom focused border
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.deepOrange.shade700, width: 2.0),
+                                    ),
+                                    prefixIcon: const Icon(Icons.numbers, color: Colors.deepOrange),
+                                    filled: true,
+                                    fillColor: Colors.deepOrange.shade50, // Light fill color
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton.icon(
+                                        onPressed: _submitQuizAnswer,
+                                        icon: const Icon(Icons.check),
+                                        label: const Text('Jawab'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green.shade700, // Darker green
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          elevation: 5,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 15),
+                                    Expanded(
+                                      child: ElevatedButton.icon(
+                                        onPressed: _cancelQuiz,
+                                        icon: const Icon(Icons.cancel),
+                                        label: const Text('Batal Kuis'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blueGrey.shade400, // Softer grey
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          elevation: 5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  _quizResult,
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.bold,
+                                    color: _quizResult.contains('Selamat') ? Colors.green.shade700 : Colors.red.shade700, // Dynamic color based on result
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Calculate Distance Card (only visible when not in quiz mode)
+                  if (!_quizMode)
+                    Card(
+                      elevation: 6, // Slightly more elevation
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), // More rounded
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0), // More padding
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Hitung Jarak ke Lokasi Lain:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextField(
+                              controller: _destinationController,
+                              decoration: InputDecoration(
+                                labelText: _pickingDestinationFromMap
+                                    ? 'Ketuk di peta untuk memilih tujuan...'
+                                    : 'Masukkan Alamat Tujuan (contoh: Monas, Jakarta)',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.blue.shade300), // Border color hint
+                                ),
+                                enabledBorder: OutlineInputBorder( // Custom enabled border
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.blue.shade300, width: 1.0),
+                                ),
+                                focusedBorder: OutlineInputBorder( // Custom focused border
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.blue.shade700, width: 2.0),
+                                ),
+                                prefixIcon: const Icon(Icons.location_on, color: Colors.blue), // Icon for input
+                                filled: true,
+                                fillColor: Colors.blue.shade50, // Light fill color
+                                suffixIcon: _pickingDestinationFromMap
+                                    ? IconButton(
+                                        icon: const Icon(Icons.cancel),
+                                        onPressed: () {
+                                          setState(() {
+                                            _pickingDestinationFromMap = false;
+                                          });
+                                          _showSnackBar('Pemilihan tujuan dari peta dibatalkan.');
+                                        },
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickingDestinationFromMap
+                                        ? null // Disable if currently picking
+                                        : () {
+                                            setState(() {
+                                              _pickingDestinationFromMap = true;
+                                              _showSnackBar('Ketuk di peta untuk memilih tujuan.');
+                                            });
+                                          },
+                                    icon: const Icon(Icons.map),
+                                    label: const Text('Pilih dari Peta'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.indigo.shade700, // Deep indigo
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      elevation: 5,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _isLoadingRoute ? null : _calculateStraightLineDistance,
+                                    icon: const Icon(Icons.straighten),
+                                    label: const Text('Jarak Garis Lurus'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange.shade700, // Vibrant orange
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      elevation: 5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ElevatedButton.icon(
+                              onPressed: _isLoadingRoute ? null : _calculateActualRoute,
+                              icon: _isLoadingRoute
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.alt_route),
+                              label: Text(_isLoadingRoute ? 'Menghitung Rute...' : 'Hitung Rute Sebenarnya'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple.shade700, // Rich purple
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              _distanceMessage,
+                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Colors.black87),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],

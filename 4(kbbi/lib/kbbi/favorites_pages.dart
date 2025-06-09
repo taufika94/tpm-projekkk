@@ -17,6 +17,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
   String _username = '';
   final DatabaseService _databaseService = DatabaseService();
 
+  // Define your custom colors here
+  static const Color primaryDarkBlue = Color(0xFF1F3240);
+  static const Color accentTeal = Color(0xFF3B7B8C);
+  static const Color backgroundLightCream = Color(0xFFF2EDDC);
+  static const Color accentOrange = Color(0xFFFF8C00);
+  static const Color textBrown = Color(0xFF7F3E2C);
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +48,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       // Optionally, show a message or navigate to login
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Anda perlu login untuk melihat favorit.')),
+          const SnackBar(content: Text('Anda perlu login untuk melihat daftar simpan.')),
         );
       }
     }
@@ -84,24 +91,30 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundLightCream, // Set background color for the page
       appBar: AppBar(
-        title: const Text('Favorit'),
+        title: const Text(
+          'Simpan',
+          style: TextStyle(color: backgroundLightCream), // AppBar title color
+        ),
+        backgroundColor: primaryDarkBlue, // AppBar background color
+        iconTheme: const IconThemeData(color: backgroundLightCream), // Back button icon color
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: accentTeal)) // Loading indicator color
           : _favorites.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.favorite_border, size: 60, color: Colors.grey),
+                      Icon(Icons.favorite_border, size: 60, color: accentTeal), // Icon color
                       const SizedBox(height: 20),
                       Text(
                         _username.isEmpty
-                            ? 'Silakan login untuk menyimpan favorit.'
-                            : 'Belum ada kata favorit, ${_username}.',
+                            ? 'Silakan login untuk menyimpan kata.'
+                            : 'Belum ada kata yang disimpan, ${_username}.',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 18, color: Colors.grey),
+                        style: TextStyle(fontSize: 18, color: textBrown), // Text color
                       ),
                       if (_username.isEmpty) ...[
                         const SizedBox(height: 20),
@@ -109,6 +122,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           onPressed: () {
                             Navigator.pushReplacementNamed(context, '/login');
                           },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accentOrange, // Button background color
+                            foregroundColor: backgroundLightCream, // Button text color
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20), // Rounded button
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                          ),
                           child: const Text('Login Sekarang'),
                         ),
                       ]
@@ -123,21 +144,34 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     return Dismissible(
                       key: Key(entry.word),
                       background: Container(
-                        color: Colors.red,
+                        color: textBrown, // Dismiss background color
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 20.0),
-                        child: const Icon(Icons.delete, color: Colors.white),
+                        child: const Icon(Icons.delete, color: backgroundLightCream), // Delete icon color
                       ),
                       direction: DismissDirection.endToStart,
                       onDismissed: (direction) {
                         _removeFavorite(entry);
                         // Show a snackbar feedback
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${entry.word} dihapus dari favorit')),
+                          SnackBar(
+                            content: Text(
+                              '${entry.word} dihapus dari favorit',
+                              style: const TextStyle(color: backgroundLightCream), // Snackbar text color
+                            ),
+                            backgroundColor: primaryDarkBlue, // Snackbar background color
+                          ),
                         );
                       },
                       child: Card(
+                        elevation: 4, // Increased elevation for a slightly more lifted look
+                        color: backgroundLightCream, // Card background color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12), // Rounded corners for cards
+                          side: const BorderSide(color: accentTeal, width: 0.5), // Subtle border
+                        ),
                         child: InkWell(
+                          borderRadius: BorderRadius.circular(12), // Match card border radius
                           onTap: () {
                             Navigator.push(
                               context,
@@ -156,7 +190,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
+                                    color: primaryDarkBlue, // Word text color
                                   ),
                                 ),
                                 if (entry.arti != null && entry.arti!.isNotEmpty)
@@ -166,7 +200,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                       entry.arti![0].deskripsi,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14, color: textBrown), // Description text color
                                     ),
                                   ),
                               ],

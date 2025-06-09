@@ -20,6 +20,13 @@ class _EntryListPageState extends State<EntryListPage> {
   bool _hasError = false;
   final TextEditingController _searchController = TextEditingController();
 
+  // Define your custom colors here
+  static const Color primaryDarkBlue = Color(0xFF1F3240);
+  static const Color accentTeal = Color(0xFF3B7B8C);
+  static const Color backgroundLightCream = Color(0xFFF2EDDC);
+  static const Color accentOrange = Color(0xFFFF8C00);
+  static const Color textBrown = Color(0xFF7F3E2C);
+
   @override
   void initState() {
     super.initState();
@@ -103,7 +110,7 @@ class _EntryListPageState extends State<EntryListPage> {
       print('Error searching entries: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = "Gagal mencari kata: ${e.toString()}";
+          _errorMessage = "Tidak ada kata yang ditemukan. Coba kata kunci lain atau periksa koneksi Anda.";
           _hasError = true;
         });
       }
@@ -131,31 +138,37 @@ class _EntryListPageState extends State<EntryListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: backgroundLightCream, // Set background color
       appBar: AppBar(
-        title: const Text('Kamus Besar Bahasa Indonesia'),
-        // Tambahkan tombol back ke HomePage
+        title: const Text(
+          'Kamus Bahasa', // Simpler title
+          style: TextStyle(color: backgroundLightCream), // Title text color
+        ),
+        backgroundColor: primaryDarkBlue, // AppBar background color
+        iconTheme: const IconThemeData(color: backgroundLightCream), // Icon colors
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement( // Gunakan pushReplacement untuk kembali ke HomePage
+            // Navigator.pushReplacement untuk kembali ke HomePage dan menghapus riwayat
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
             );
-            // Alternatif: Navigator.pushReplacementNamed(context, '/home');
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: const Icon(Icons.bookmark), // Changed to bookmark for consistency
             onPressed: () => Navigator.pushNamed(context, '/favorites'),
+            color: backgroundLightCream, // Icon color
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadPopularEntries,
+            color: backgroundLightCream, // Icon color
           ),
-          // --- TAMBAHKAN POPUPMENUBUTTON UNTUK LOGOUT ---
           PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: backgroundLightCream), // Hamburger icon color
             onSelected: (value) {
               if (value == 'logout') {
                 _logout();
@@ -163,14 +176,16 @@ class _EntryListPageState extends State<EntryListPage> {
             },
             itemBuilder: (BuildContext context) {
               return [
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'logout',
-                  child: Text('Logout'),
+                  child: Text(
+                    'Logout',
+                    style: TextStyle(color: primaryDarkBlue), // Text color for popup item
+                  ),
                 ),
               ];
             },
           ),
-          // --- AKHIR TAMBAHAN POPUPMENUBUTTON ---
         ],
       ),
       body: Column(
@@ -179,22 +194,35 @@ class _EntryListPageState extends State<EntryListPage> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
+              cursorColor: accentTeal, // Cursor color
               decoration: InputDecoration(
-                hintText: 'Cari kata dalam KBBI...',
-                prefixIcon: const Icon(Icons.search),
+                hintText: 'Cari kata...', // Simpler hint text
+                hintStyle: TextStyle(color: textBrown.withOpacity(0.7)), // Hint text color
+                prefixIcon: const Icon(Icons.search, color: accentTeal), // Icon color
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: const Icon(Icons.clear, color: textBrown), // Icon color
                   onPressed: () {
                     _searchController.clear();
                     _searchEntries('');
                   },
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(30.0), // More rounded corners
+                  borderSide: BorderSide.none, // No explicit border line
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: const BorderSide(color: accentTeal, width: 1.5), // Teal border when enabled
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: const BorderSide(color: accentOrange, width: 2.0), // Orange border when focused
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: backgroundLightCream, // Fill color for TextField
+                contentPadding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0), // Adjust padding
               ),
+              style: TextStyle(color: primaryDarkBlue), // Input text color
               onSubmitted: (value) {
                 _searchEntries(value);
               },
@@ -207,15 +235,17 @@ class _EntryListPageState extends State<EntryListPage> {
   }
 
   Widget _buildBody() {
-    // ... (kode _buildBody sama seperti sebelumnya) ...
     if (_isLoading && _entries.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Memuat data kamus...'),
+            CircularProgressIndicator(color: accentTeal), // Progress indicator color
+            const SizedBox(height: 16),
+            Text(
+              'Memuat data kamus...',
+              style: TextStyle(color: primaryDarkBlue), // Text color
+            ),
           ],
         ),
       );
@@ -226,17 +256,17 @@ class _EntryListPageState extends State<EntryListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 60),
+            const Icon(Icons.error_outline, color: textBrown, size: 60), // Error icon color
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Terjadi kesalahan',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDarkBlue), // Text color
             ),
             const SizedBox(height: 10),
             Text(
               _errorMessage,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14, color: textBrown), // Text color
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -247,6 +277,14 @@ class _EntryListPageState extends State<EntryListPage> {
                   _searchEntries(_searchController.text);
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentOrange, // Button background color
+                foregroundColor: backgroundLightCream, // Button text/icon color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20), // Rounded button
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
               child: const Text('Coba Lagi'),
             ),
           ],
@@ -259,20 +297,29 @@ class _EntryListPageState extends State<EntryListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.book, size: 60, color: Colors.blue),
+            const Icon(Icons.book, size: 60, color: accentTeal), // Icon color
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Tidak ada hasil ditemukan',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDarkBlue), // Text color
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Coba kata kunci lain atau muat ulang data',
-              style: TextStyle(fontSize: 14),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: textBrown), // Text color
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadPopularEntries,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentTeal, // Button background color
+                foregroundColor: backgroundLightCream, // Button text/icon color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20), // Rounded button
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
               child: const Text('Muat Ulang'),
             ),
           ],
@@ -282,6 +329,7 @@ class _EntryListPageState extends State<EntryListPage> {
 
     return RefreshIndicator(
       onRefresh: _loadPopularEntries,
+      color: accentOrange, // Refresh indicator color
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: _entries.length,
@@ -296,16 +344,22 @@ class _EntryListPageState extends State<EntryListPage> {
   Widget _buildEntryCard(KbbiEntry entry) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
+      elevation: 4, // Increased elevation for a slightly more lifted look
+      color: backgroundLightCream, // Card background color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12), // Rounded corners for cards
+        side: const BorderSide(color: accentTeal, width: 0.5), // Subtle border
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(12), // Match card border radius
         onTap: () {
           Navigator.pushNamed(
-             context,
-             '/kbbi_detail', // <--- Nama rute baru untuk detail page
-             arguments: entry,
+            context,
+            '/kbbi_detail', // <--- Nama rute baru untuk detail page
+            arguments: entry,
           ).then((_) {
-            });
+            // Optional: You can do something here when returning from detail page
+          });
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -317,7 +371,7 @@ class _EntryListPageState extends State<EntryListPage> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: primaryDarkBlue, // Changed text color
                 ),
               ),
               const SizedBox(height: 8),
@@ -328,7 +382,7 @@ class _EntryListPageState extends State<EntryListPage> {
                     '(${entry.type!})',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: textBrown, // Changed text color
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -341,7 +395,7 @@ class _EntryListPageState extends State<EntryListPage> {
                             padding: const EdgeInsets.only(bottom: 4.0),
                             child: Text(
                               '- ${meaning.deskripsi}',
-                              style: const TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16, color: primaryDarkBlue), // Changed text color
                             ),
                           ))
                       .toList(),

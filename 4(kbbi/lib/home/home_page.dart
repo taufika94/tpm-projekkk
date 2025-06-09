@@ -1,5 +1,6 @@
 // app/home/home_page.dart
 
+import 'package:app/home/app_colors.dart';
 import 'package:app/home/feeback_page.dart';
 import 'package:app/home/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:app/Currency_Converter/CurrencyConverterPage.dart';
 import 'package:app/time_converter/time_converter_page.dart';
 import 'package:app/jarak/location_tracker_page.dart';
 import 'package:app/home/notification_page.dart';
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -66,118 +66,49 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             Text(
               'Selamat datang, $_username!',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryDarkBlue), // Changed text color
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Anda telah berhasil masuk dan berada di halaman utama.',
               textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.primaryDarkBlue), // Changed text color
             ),
             const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const EntryListPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Mulai Cari Kata KBBI',
-                style: TextStyle(fontSize: 18),
-              ),
+            _buildFeatureButton(
+              context,
+              'Mulai Cari Kata KBBI',
+              const EntryListPage(),
+              AppColors.primaryTeal, // Button color from palette
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CurrencyConverterPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Konversi Mata Uang',
-                style: TextStyle(fontSize: 18),
-              ),
+            _buildFeatureButton(
+              context,
+              'Konversi Mata Uang',
+              const CurrencyConverterPage(),
+              AppColors.accentOrange, // Button color from palette
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TimeConverterPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.purple,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Konversi Waktu (WIB/WITA/WIT)',
-                style: TextStyle(fontSize: 18),
-              ),
+            _buildFeatureButton(
+              context,
+              'Konversi Waktu (WIB/WITA/WIT)',
+              const TimeConverterPage(),
+              AppColors.darkReddishBrown, // Button color from palette
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LocationTrackerPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Lacak Lokasi & Hitung Jarak',
-                style: TextStyle(fontSize: 18),
-              ),
+            _buildFeatureButton(
+              context,
+              'Lacak Lokasi & Hitung Jarak',
+              const LocationTrackerPage(),
+              AppColors.primaryDarkBlue, // Button color from palette
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>  NotificationPage(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                backgroundColor: Colors.blueAccent,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Tampilkan Notifikasi',
-                style: TextStyle(fontSize: 18),
-              ),
+            _buildFeatureButton(
+              context,
+              'Tampilkan Notifikasi',
+              NotificationPage(),
+              AppColors.primaryTeal, // Button color from palette
             ),
           ],
         ),
@@ -185,16 +116,47 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Helper method to create consistent styled buttons
+  Widget _buildFeatureButton(BuildContext context, String text, Widget page, Color color) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => page),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: color, // Dynamic background color
+        foregroundColor: Colors.white, // White font for colored buttons
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 18),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.lightBeige, // Scaffold background from palette
       appBar: AppBar(
-        title: const Text('KBBI App'),
+        title: const Text(
+          'KBBI App',
+          style: TextStyle(color: Colors.white), // White font for AppBar title
+        ),
+        backgroundColor: AppColors.primaryDarkBlue, // AppBar color from palette
+        iconTheme: const IconThemeData(color: Colors.white), // White icons for AppBar
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Logout',
+            color: Colors.white, // White icon for logout
           ),
         ],
       ),
@@ -215,7 +177,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: AppColors.accentOrange, // Selected item color from palette
+        unselectedItemColor: Colors.white70, // Unselected item color
+        backgroundColor: AppColors.primaryDarkBlue, // Bottom nav bar background from palette
         onTap: _onItemTapped,
       ),
     );

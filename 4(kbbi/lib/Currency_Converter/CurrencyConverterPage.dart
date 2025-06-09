@@ -1,6 +1,6 @@
 // app/home/currency_converter_page.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // <--- Tambahkan import ini
+import 'package:intl/intl.dart'; 
 
 class CurrencyConverterPage extends StatefulWidget {
   const CurrencyConverterPage({super.key});
@@ -16,13 +16,20 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
   double _convertedAmount = 0.0;
   String _resultText = '';
 
+  // Define your custom colors here based on the palette
+  static const Color primaryDarkBlue = Color(0xFF1F3240);
+  static const Color accentTeal = Color(0xFF3B7B8C);
+  static const Color backgroundLightCream = Color(0xFFF2EDDC);
+  static const Color accentOrange = Color(0xFFFF8C00);
+  static const Color textBrown = Color(0xFF7F3E2C);
+
   // Simulasi nilai tukar (dalam aplikasi nyata, ini dari API)
   final Map<String, double> _exchangeRates = {
-    'IDR': 1.0,      // Basis
-    'USD': 15800.0,  // 1 USD = 15800 IDR
-    'EUR': 17000.0,  // 1 EUR = 17000 IDR
-    'JPY': 100.0,    // 1 JPY = 100 IDR (approx. 15800/100 = 158 JPY per USD)
-    'SGD': 11700.0,  // 1 SGD = 11700 IDR
+    'IDR': 1.0, // Basis
+    'USD': 15800.0, // 1 USD = 15800 IDR
+    'EUR': 17000.0, // 1 EUR = 17000 IDR
+    'JPY': 100.0, // 1 JPY = 100 IDR (approx. 15800/100 = 158 JPY per USD)
+    'SGD': 11700.0, // 1 SGD = 11700 IDR
   };
 
   void _convertCurrency() {
@@ -34,9 +41,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         return;
       }
 
-      // Gunakan NumberFormat untuk parsing yang lebih fleksibel jika input pengguna
-      // mungkin menggunakan koma sebagai desimal (misal: "1.000,50")
-      final NumberFormat _formatter = NumberFormat.currency(
+      final NumberFormat formatter = NumberFormat.currency(
         locale: 'id_ID', // Sesuaikan dengan locale pengguna
         symbol: '', // Jangan tampilkan simbol mata uang saat parsing
         decimalDigits: null, // Biarkan NumberFormat menentukan desimal saat parsing
@@ -44,10 +49,8 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
 
       double? amount;
       try {
-        // Coba parse dengan locale yang ditentukan
-        amount = _formatter.parse(_amountController.text).toDouble();
+        amount = formatter.parse(_amountController.text).toDouble();
       } catch (e) {
-        // Fallback ke double.tryParse jika NumberFormat gagal (misal: input hanya "123.45")
         amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
       }
 
@@ -57,17 +60,14 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         return;
       }
 
-      // Konversi jumlah ke basis (IDR)
       final double amountInIDR = amount * _exchangeRates[_selectedFromCurrency]!;
 
-      // Konversi dari basis (IDR) ke mata uang tujuan
       _convertedAmount = amountInIDR / _exchangeRates[_selectedToCurrency]!;
 
-      // Format hasil dengan NumberFormat untuk tampilan yang lebih baik (misal: 100.000,50)
       final String formattedAmount = NumberFormat.currency(
-        locale: 'id_ID', // Sesuaikan dengan locale pengguna (misal: 'en_US' untuk koma sebagai desimal)
+        locale: 'id_ID',
         symbol: '',
-        decimalDigits: 2, // Biasanya 2 desimal untuk mata uang, sesuaikan jika perlu
+        decimalDigits: 2,
       ).format(amount);
 
       final String formattedConvertedAmount = NumberFormat.currency(
@@ -76,8 +76,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         decimalDigits: 2,
       ).format(_convertedAmount);
 
-      _resultText =
-          '$formattedAmount $_selectedFromCurrency = $formattedConvertedAmount $_selectedToCurrency';
+      _resultText = '$formattedAmount $_selectedFromCurrency = $formattedConvertedAmount $_selectedToCurrency';
     });
   }
 
@@ -90,28 +89,64 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundLightCream, // Set background color
       appBar: AppBar(
-        title: const Text('Konverter Mata Uang'),
+        title: const Text(
+          'Konverter Mata Uang',
+          style: TextStyle(color: backgroundLightCream), // Title color
+        ),
+        backgroundColor: primaryDarkBlue, // AppBar background
+        iconTheme: const IconThemeData(color: backgroundLightCream), // Back icon color
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _amountController,
-              // Gunakan numberWithOptions untuk keyboard yang lebih spesifik
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false), // signed: false untuk memastikan angka positif
-              decoration: InputDecoration(
-                labelText: 'Jumlah',
-                hintText: 'Masukkan jumlah yang akan dikonversi (misal: 1000000.50 atau 1.000.000,50)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.monetization_on),
+            Text(
+              'Masukkan Jumlah',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: primaryDarkBlue,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+              decoration: InputDecoration(
+                labelText: 'Jumlah',
+                hintText: 'Cth: 1.000.000,50',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: accentTeal), // Border color
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: accentTeal),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: accentOrange, width: 2), // Focused border color
+                ),
+                prefixIcon: Icon(Icons.monetization_on, color: accentTeal), // Icon color
+                labelStyle: TextStyle(color: textBrown), // Label text color
+                hintStyle: TextStyle(color: textBrown.withOpacity(0.6)), // Hint text color
+              ),
+              style: TextStyle(color: primaryDarkBlue, fontSize: 16), // Input text color
+              cursorColor: accentOrange, // Cursor color
+            ),
+            const SizedBox(height: 30),
+            Text(
+              'Pilih Mata Uang',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: primaryDarkBlue,
+              ),
+            ),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -122,8 +157,21 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                       labelText: 'Dari',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentTeal),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentTeal),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentOrange, width: 2),
+                      ),
+                      labelStyle: TextStyle(color: textBrown),
                     ),
+                    dropdownColor: backgroundLightCream, // Dropdown menu background
+                    style: TextStyle(color: primaryDarkBlue, fontSize: 16), // Dropdown item text color
+                    iconEnabledColor: accentTeal, // Dropdown arrow color
                     items: _exchangeRates.keys.map((String currency) {
                       return DropdownMenuItem<String>(
                         value: currency,
@@ -133,14 +181,14 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                     onChanged: (String? newValue) {
                       setState(() {
                         _selectedFromCurrency = newValue!;
-                        _resultText = ''; // Reset hasil saat pilihan berubah
+                        _resultText = '';
                       });
                     },
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Icon(Icons.arrow_forward),
-                const SizedBox(width: 10),
+                const SizedBox(width: 15),
+                Icon(Icons.arrow_forward, color: primaryDarkBlue, size: 30), // Arrow icon color and size
+                const SizedBox(width: 15),
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _selectedToCurrency,
@@ -148,8 +196,21 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                       labelText: 'Ke',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentTeal),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentTeal),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: accentOrange, width: 2),
+                      ),
+                      labelStyle: TextStyle(color: textBrown),
                     ),
+                    dropdownColor: backgroundLightCream,
+                    style: TextStyle(color: primaryDarkBlue, fontSize: 16),
+                    iconEnabledColor: accentTeal,
                     items: _exchangeRates.keys.map((String currency) {
                       return DropdownMenuItem<String>(
                         value: currency,
@@ -159,39 +220,47 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
                     onChanged: (String? newValue) {
                       setState(() {
                         _selectedToCurrency = newValue!;
-                        _resultText = ''; // Reset hasil saat pilihan berubah
+                        _resultText = '';
                       });
                     },
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: _convertCurrency,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(15), // Slightly more rounded button
                 ),
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
+                backgroundColor: accentOrange, // Button background color
+                foregroundColor: backgroundLightCream, // Button text color
+                elevation: 5, // Add a slight shadow
               ),
               child: const Text(
                 'Konversi',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(height: 30),
-            Text(
-              _resultText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: _resultText.startsWith('Jumlah tidak valid')
-                    ? Colors.red
-                    : Theme.of(context).primaryColor,
+            const SizedBox(height: 40),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Text(
+                _resultText.isEmpty ? 'Hasil Konversi Akan Muncul Disini' : _resultText,
+                key: ValueKey<String>(_resultText), // Key is important for AnimatedSwitcher
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: _resultText.isEmpty ? 18 : 26, // Smaller text for placeholder
+                  fontWeight: FontWeight.bold,
+                  color: _resultText.isEmpty
+                      ? textBrown.withOpacity(0.6)
+                      : (_resultText.startsWith('Jumlah tidak valid') ? Colors.red : primaryDarkBlue),
+                ),
               ),
             ),
           ],

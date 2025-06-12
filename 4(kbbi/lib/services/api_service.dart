@@ -4,7 +4,7 @@ import '../kbbi/database/kbbi_entry.dart';
 
 class ApiService {
   static const String _baseUrl =
-  'http://192.168.0.100:3001'; // Ensure this is correct
+  'https://be-rest-928661779459.us-central1.run.app'; // Ensure this is correct
   static const Duration _timeoutDuration = Duration(seconds: 100000);
 
   // Search entries

@@ -17,7 +17,7 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLoading = false;
   bool _isPasswordVisible = false; // Untuk mengontrol visibilitas password
 
-  final String _baseUrl = 'http://localhost:3001'; // Sesuaikan dengan URL server Node.js Anda
+  final String _baseUrl = 'https://be-rest-928661779459.us-central1.run.app'; // Sesuaikan dengan URL server Node.js Anda
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;

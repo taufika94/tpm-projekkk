@@ -71,14 +71,13 @@ class _KbbiAppState extends State<KbbiApp> {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
-              body: Center(
-                child: Text('Terjadi kesalahan: ${snapshot.error}'),
-              ),
+              body: Center(child: Text('Terjadi kesalahan: ${snapshot.error}')),
             ),
           );
         } else {
           // Setelah status login diketahui
-          final bool isLoggedIn = snapshot.data ?? false; // Ambil hasil dari Future
+          final bool isLoggedIn =
+              snapshot.data ?? false; // Ambil hasil dari Future
 
           return MaterialApp(
             title: 'KBBI App',

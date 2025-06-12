@@ -1,5 +1,5 @@
 substitutions:
-  _ENV: gs://api-196/.env
+  _ENV: gs://196-tcc-db/.env
 
 steps:
   # Ngambil data env yg disimpen di cloud storage pake gsuri

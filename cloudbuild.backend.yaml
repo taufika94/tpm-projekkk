@@ -1,9 +1,6 @@
-steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-node-app', 'proxy']
-  
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/my-node-app']
-
-images:
-  - 'gcr.io/$PROJECT_ID/my-node-app'
+FROM node:20-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 3001
+CMD ["node", "index.js"]

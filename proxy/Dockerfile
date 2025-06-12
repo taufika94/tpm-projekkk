@@ -1,20 +1,23 @@
-# Use the official Node.js image as a base
-FROM node:14
+# Gunakan image Node.js LTS terbaru (misalnya versi 20 atau 22) dengan varian Alpine untuk ukuran yang lebih kecil
+FROM node:20-alpine
 
-# Set the working directory
+# Set direktori kerja di dalam container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Salin package.json dan package-lock.json terlebih dahulu untuk memanfaatkan caching Docker layer
 COPY package*.json ./
 
-# Install dependencies
+# Instal dependensi aplikasi
 RUN npm install
 
-# Copy the rest of the application code
+# Salin sisa kode aplikasi ke direktori kerja
+# Ini akan menyalin semua file dan folder dari konteks build (direktori tempat Dockerfile berada, atau yang Anda tentukan di cloudbuild.yaml)
 COPY . .
 
-# Expose the port the app runs on
+# Expose port yang digunakan aplikasi Anda
+# Ini cocok dengan `const PORT = process.env.PORT || 3001;` di kode Node.js Anda
 EXPOSE 3001
 
-# Command to run the application
+# Perintah untuk menjalankan aplikasi ketika container dimulai
+# Pastikan 'index.js' adalah nama file utama aplikasi Anda
 CMD ["node", "index.js"]
